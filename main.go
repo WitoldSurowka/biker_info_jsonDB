@@ -1,11 +1,9 @@
 package main
 
 import (
-	"encoding/csv"
 	"fmt"
 	"github.com/gocolly/colly"
-	"log"
-	"os"
+	"strconv"
 	"strings"
 )
 
@@ -17,42 +15,34 @@ type WeatherStatus struct {
 func main() {
 	var status WeatherStatus
 	c := colly.NewCollector()
+	shouldStop := false
 
-	c.OnHTML(".daily-list-item", func(e *colly.HTMLElement) {
+	c.OnHTML(".daily-weather-list-item", func(e *colly.HTMLElement) {
+		if shouldStop {
+			return
+		}
 
 		status.url = e.ChildAttr("a", "href")
-		status.precip = e.ChildText(".precip")
+		status.precip = e.ChildText(".Precipitation-module__main-sU6qN[data-color=true]")
 
 		fmt.Println(status)
-		if strings.Contains(status.url, "tomorrow") {
-			return
+		//c.OnHTML scrape in a loop, so after the desired data is fetched, we do not process data no more
+		if strings.Contains(status.url, "i=1") {
+			shouldStop = true
 		}
 	})
 
-	c.Visit("https://www.accuweather.com/pl/pl/krakow/274455/weather-forecast/274455")
+	c.Visit("https://www.yr.no/nb/v%C3%A6rvarsel/daglig-tabell/2-3099434/Polen/Pomorskie/Gda%C5%84sk/Gda%C5%84sk")
 	c.Wait() // Wait until scraping is complete
 
-	file, err := os.Create("weather.csv")
+	precipStringLong := status.precip[:len(status.precip)-2]
+	precipStringShort := precipStringLong[8:]
+	precipStringShort = strings.Replace(precipStringShort, ",", ".", 1)
+	precip, err := strconv.ParseFloat(precipStringShort, 32)
 	if err != nil {
-		log.Fatalln("Failed to create output CSV file", err)
-	}
-	defer file.Close()
-
-	writer := csv.NewWriter(file)
-	headers := []string{"url", "precipitation"}
-	if err := writer.Write(headers); err != nil {
-		log.Fatalln("Failed to write headers to CSV file", err)
+		fmt.Println("Conversion error:", err)
+		return
 	}
 
-	record := []string{status.url, status.precip}
-
-	if err := writer.Write(record); err != nil {
-		log.Fatalln("Failed to write record to CSV file", err)
-	}
-
-	writer.Flush()
-
-	if err := writer.Error(); err != nil {
-		log.Fatalln("Error occurred during flushing to CSV file", err)
-	}
+	fmt.Println(precip)
 }

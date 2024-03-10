@@ -32,7 +32,7 @@ func main() {
 		}
 	})
 
-	c.Visit("https://www.yr.no/nb/v%C3%A6rvarsel/daglig-tabell/2-3099434/Polen/Pomorskie/Gda%C5%84sk/Gda%C5%84sk")
+	c.Visit("https://www.yr.no/nb/v%C3%A6rvarsel/daglig-tabell/2-3094802/Polen/Ma%C5%82opolskie/Krak%C3%B3w/Krak%C3%B3w")
 	c.Wait() // Wait until scraping is complete
 
 	precipStringLong := status.precip[:len(status.precip)-2]
@@ -45,4 +45,5 @@ func main() {
 	}
 
 	fmt.Println(precip)
+
 }

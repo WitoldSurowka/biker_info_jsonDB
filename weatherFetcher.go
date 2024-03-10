@@ -1,0 +1,72 @@
+package main
+
+import (
+	"fmt"
+	"github.com/gocolly/colly"
+	"math"
+	"strconv"
+	"strings"
+)
+
+// rounding floats func
+func roundToPlaces(value float64, places int) float64 {
+	shift := math.Pow(10, float64(places))
+	return math.Floor(value*shift+0.5) / shift
+}
+
+// initializing a data structure to keep the scraped data
+type WeatherStatus struct {
+	url, precip, tempMin, wind string
+}
+
+func WeatherFetcher() (float64, int, float64) {
+	var status WeatherStatus
+	c := colly.NewCollector()
+	shouldStop := false
+
+	c.OnHTML(".daily-weather-list-item", func(e *colly.HTMLElement) {
+		if shouldStop {
+			return
+		}
+
+		status.url = e.ChildAttr("a", "href")
+		status.precip = e.ChildText(".Precipitation-module__main-sU6qN[data-color=true]")
+		status.tempMin = e.ChildText("span.temperature.min-max-temperature__min.temperature--warm")
+		status.wind = e.ChildText("div.daily-weather-list-item__wind")
+		//c.OnHTML scrape in a loop, so after the desired data is fetched, we do not process data no more
+		if strings.Contains(status.url, "i=0") {
+			shouldStop = true
+		}
+	})
+
+	c.Visit("https://www.yr.no/nb/v%C3%A6rvarsel/daglig-tabell/2-3094802/Polen/Ma%C5%82opolskie/Krak%C3%B3w/Krak%C3%B3w")
+	c.Wait() // Wait until scraping is complete
+
+	//process precipitation string->float
+	precipStringLong := status.precip[:len(status.precip)-2]
+	precipStringShort := precipStringLong[8:]
+	precipStringShort = strings.Replace(precipStringShort, ",", ".", 1)
+	precip, err := strconv.ParseFloat(precipStringShort, 32)
+	if err != nil {
+		fmt.Println("Precip conversion error:", err)
+		precip = 0
+	}
+	precip = roundToPlaces(precip, 2)
+	//process tempMin string->int
+	tempMinString := status.tempMin[:len(status.tempMin)-2]
+	tempMin, err := strconv.Atoi(tempMinString)
+	if err != nil {
+		fmt.Println("TempMin conversion error:", err)
+		tempMin = 15
+	}
+
+	//process wind string->int
+	windStringLong := status.wind[:len(status.wind)-3]
+	windStringShort := windStringLong[5:]
+	wind, err := strconv.ParseFloat(windStringShort, 64)
+	if err != nil {
+		fmt.Println("Wind conversion error:", err)
+		wind = 0
+	}
+	return precip, tempMin, wind
+}

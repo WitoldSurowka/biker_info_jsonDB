@@ -22,20 +22,23 @@ type WeatherConditions struct {
 	Precip  float64 // Precipitation in mm
 	TempMin int     // Minimum temperature in °C
 	Wind    float64 // Wind speed in km/h
+	City    string
 }
 
 // NewWeatherConditions constructor for WeatherConditions structure.
-func NewWeatherConditions(precip float64, tempMin int, wind float64) *WeatherConditions {
+func NewWeatherConditions(precip float64, tempMin int, wind float64, city string) *WeatherConditions {
 	return &WeatherConditions{
 		Precip:  precip,
 		TempMin: tempMin,
 		Wind:    wind,
+		City:    city,
 	}
 }
 
 // CheckConditions method checks for exceeded values and composes a message.
 func (wc *WeatherConditions) WeatherConditionMessage() string {
-	var message string
+	var message, cityString string
+	cityString = "[" + wc.City + "]"
 
 	if wc.Precip > 2.2 && wc.Precip < 5 {
 		message += fmt.Sprintf("Lekki deszcz: %.2f mm.\n", wc.Precip)
@@ -53,9 +56,9 @@ func (wc *WeatherConditions) WeatherConditionMessage() string {
 		message += fmt.Sprintf("Wyjątkowo silny wiatr: %.2f km/h.\n", wc.Wind*3.6)
 	}
 	if len(message) == 0 {
-		message = "Jutro odpowiednie warunki do jazdy jednośladem \\m/"
+		message = "Jutro odpowiednie warunki do jazdy jednośladem \\m/" + cityString
 	} else {
-		message = fmt.Sprintln("Uwaga, jutro (", m[fmt.Sprint(time.Now().Weekday()+1)], ") niekorzystne warunki dla jednośladów:") + message
+		message = fmt.Sprintln("Uwaga"+cityString+", jutro (", m[fmt.Sprint(time.Now().Weekday()+1)], ") niekorzystne warunki dla jednośladów:") + message
 	}
 
 	return message

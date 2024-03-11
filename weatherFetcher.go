@@ -19,7 +19,7 @@ type WeatherStatus struct {
 	url, precip, tempMin, wind string
 }
 
-func WeatherFetcher() (float64, int, float64) {
+func WeatherFetcher() (float64, int, float64, string) {
 	var status WeatherStatus
 	c := colly.NewCollector()
 	shouldStop := false
@@ -34,7 +34,7 @@ func WeatherFetcher() (float64, int, float64) {
 		status.tempMin = e.ChildText("span.temperature.min-max-temperature__min.temperature--warm")
 		status.wind = e.ChildText("div.daily-weather-list-item__wind")
 		//c.OnHTML scrape in a loop, so after the desired data is fetched, we do not process data no more
-		if strings.Contains(status.url, "i=0") {
+		if strings.Contains(status.url, "i=1") {
 			shouldStop = true
 		}
 	})
@@ -68,5 +68,5 @@ func WeatherFetcher() (float64, int, float64) {
 		fmt.Println("Wind conversion error:", err)
 		wind = 0
 	}
-	return precip, tempMin, wind
+	return precip, tempMin, wind, "Kraków"
 }

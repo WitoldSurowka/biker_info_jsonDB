@@ -6,6 +6,7 @@ import (
 	"math"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // rounding floats func
@@ -16,25 +17,28 @@ func roundToPlaces(value float64, places int) float64 {
 
 // initializing a data structure to keep the scraped data
 type WeatherStatus struct {
-	url, precip, tempMin, wind string
+	date, url, precip, tempMin, wind string
 }
 
 func WeatherFetcher() (float64, int, float64, string) {
 	var status WeatherStatus
 	c := colly.NewCollector()
 	shouldStop := false
+	dateTomorrow := time.Now().Add(time.Hour * 24)
+	dateTomorrowString := fmt.Sprintf(dateTomorrow.Format("2006-01-02"))
 
 	c.OnHTML(".daily-weather-list-item", func(e *colly.HTMLElement) {
 		if shouldStop {
 			return
 		}
-
+		status.date = e.ChildAttr("time", "datetime")
 		status.url = e.ChildAttr("a", "href")
 		status.precip = e.ChildText(".Precipitation-module__main-sU6qN[data-color=true]")
 		status.tempMin = e.ChildText("span.temperature.min-max-temperature__min.temperature--warm")
 		status.wind = e.ChildText("div.daily-weather-list-item__wind")
 		//c.OnHTML scrape in a loop, so after the desired data is fetched, we do not process data no more
-		if strings.Contains(status.url, "i=1") {
+		fmt.Println(status)
+		if strings.EqualFold(dateTomorrowString, status.date) {
 			shouldStop = true
 		}
 	})

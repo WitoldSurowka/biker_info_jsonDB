@@ -40,25 +40,35 @@ func (wc *WeatherConditions) WeatherConditionMessage() string {
 	var message, cityString string
 	cityString = "[" + wc.City + "]"
 
-	if wc.Precip > 2.2 && wc.Precip < 5 {
-		message += fmt.Sprintf("Lekki deszcz: %.2f mm.\n", wc.Precip)
+	if wc.Precip > 1.9 && wc.Precip < 3 {
+		message += fmt.Sprintf("Mrzawka: %.2f mm.\n", wc.Precip)
 	}
-	if wc.Precip >= 5 {
-		message += fmt.Sprintf("Znaczny deszcz: %.2f mm.\n", wc.Precip)
+	if wc.Precip >= 3 && wc.Precip < 10 {
+		message += fmt.Sprintf("Deszcz: %.2f mm.\n", wc.Precip)
+	}
+	if wc.Precip >= 10 {
+		message += fmt.Sprintf("Ulewa: %.2f mm.\n", wc.Precip)
 	}
 	if wc.TempMin < 10 && wc.TempMin > 2 {
 		message += fmt.Sprintf("Zimno - temperatura minimalna: %v °C.\n", wc.TempMin)
 	}
 	if wc.TempMin <= 2 {
-		message += fmt.Sprintf("Możliwe oblodzenie - temperatura minimalna: %v °C.\n", wc.TempMin)
+		message += fmt.Sprintf("Zimno i możliwe oblodzenie - temperatura minimalna: %v °C.\n", wc.TempMin)
 	}
-	if wc.Wind >= 14 {
+	if wc.Wind >= 11 {
 		message += fmt.Sprintf("Wyjątkowo silny wiatr: %.2f km/h.\n", wc.Wind*3.6)
+	}
+	if len(message) > 0 {
+		message = fmt.Sprintln("Uwaga"+cityString+", jutro (", m[fmt.Sprint(time.Now().Weekday()+1)], ") niekorzystne warunki dla jednośladów:") + message
+	}
+	if wc.Wind <= 8 && wc.TempMin >= 18 && wc.Precip == 0 {
+		message = fmt.Sprintf("Jutro "+cityString+" idealne warunki pogodowe dla jednośladów: \n"+
+			"wiatr:%.2f km/h,\n"+
+			"temperatura minimalna:%v °C,\n"+
+			"brak opadów.\n", wc.Wind*3.6, wc.TempMin)
 	}
 	if len(message) == 0 {
 		message = "Jutro odpowiednie warunki do jazdy jednośladem \\m/" + cityString
-	} else {
-		message = fmt.Sprintln("Uwaga"+cityString+", jutro (", m[fmt.Sprint(time.Now().Weekday()+1)], ") niekorzystne warunki dla jednośladów:") + message
 	}
 
 	return message

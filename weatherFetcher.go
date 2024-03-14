@@ -34,10 +34,15 @@ func WeatherFetcher() (float64, int, float64, string) {
 		status.date = e.ChildAttr("time", "datetime")
 		status.url = e.ChildAttr("a", "href")
 		status.precip = e.ChildText(".Precipitation-module__main-sU6qN[data-color=true]")
-		status.tempMin = e.ChildText("span.temperature.min-max-temperature__min.temperature--warm")
+		if len(e.ChildText("span.temperature.min-max-temperature__min.temperature--warm")) != 0 {
+			status.tempMin = e.ChildText("span.temperature.min-max-temperature__min.temperature--warm")
+		}
+		if len(e.ChildText("span.temperature.min-max-temperature__min.temperature--cold")) != 0 {
+			status.tempMin = e.ChildText("span.temperature.min-max-temperature__min.temperature--cold")
+		}
 		status.wind = e.ChildText("div.daily-weather-list-item__wind")
 		//c.OnHTML scrape in a loop, so after the desired data is fetched, we do not process data no more
-		//fmt.Println(status)
+		fmt.Println(status)
 		if strings.EqualFold(dateTomorrowString, status.date) {
 			shouldStop = true
 		}

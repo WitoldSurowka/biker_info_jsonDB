@@ -17,7 +17,7 @@ func main() {
 		currentTime = time.Now()
 		fmt.Println(currentTime)
 		// Check if current time is 20:00:00
-		if currentTime.Hour() == 22 && currentTime.Minute() == 43 && currentTime.Second() == 30 {
+		if currentTime.Hour() == 23 && currentTime.Minute() == 38 && currentTime.Second() == 30 {
 			wc := NewWeatherConditions(WeatherFetcher())
 			fmt.Println(wc.WeatherConditionMessage())
 		}

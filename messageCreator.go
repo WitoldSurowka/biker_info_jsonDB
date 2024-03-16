@@ -8,13 +8,13 @@ import (
 //Make weekdays polish
 
 var m = map[string]string{
-	"Monday":    "Poniedziałek",
-	"Tuesday":   "Wtorek",
-	"Wednesday": "Środa",
-	"Thursday":  "Czwartek",
-	"Friday":    "Piątek",
-	"Saturday":  "Sobota",
-	"Sunday":    "Niedziela",
+	"Monday":       "Poniedziałek",
+	"Tuesday":      "Wtorek",
+	"Wednesday":    "Środa",
+	"Thursday":     "Czwartek",
+	"Friday":       "Piątek",
+	"Saturday":     "Sobota",
+	"%!Weekday(7)": "Niedziela",
 }
 
 // WeatherConditions structure holds weather variables and their threshold values.
@@ -39,7 +39,6 @@ func NewWeatherConditions(precip float64, tempMin int, wind float64, city string
 func (wc *WeatherConditions) WeatherConditionMessage() string {
 	var message, cityString string
 	cityString = "[" + wc.City + "]"
-
 	if wc.Precip > 1.9 && wc.Precip < 3 {
 		message += fmt.Sprintf("Mrzawka: %.2f mm.\n", wc.Precip)
 	}

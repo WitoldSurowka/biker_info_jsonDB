@@ -3,24 +3,17 @@ package main
 import (
 	"fmt"
 	"github.com/gocolly/colly"
-	"math"
 	"strconv"
 	"strings"
 	"time"
 )
-
-// rounding floats func
-func roundToPlaces(value float64, places int) float64 {
-	shift := math.Pow(10, float64(places))
-	return math.Floor(value*shift+0.5) / shift
-}
 
 // initializing a data structure to keep the scraped data
 type WeatherStatus struct {
 	date, url, precip, tempMin, wind string
 }
 
-func WeatherFetcher() (float64, int, float64, string) {
+func WeatherFetcher(city string) (float64, int, float64, string) {
 	var status WeatherStatus
 	c := colly.NewCollector()
 	shouldStop := false
@@ -42,13 +35,13 @@ func WeatherFetcher() (float64, int, float64, string) {
 		}
 		status.wind = e.ChildText("div.daily-weather-list-item__wind")
 		//c.OnHTML scrape in a loop, so after the desired data is fetched, we do not process data no more
-		fmt.Println(status)
+		//fmt.Println(status)
 		if strings.EqualFold(dateTomorrowString, status.date) {
 			shouldStop = true
 		}
 	})
 
-	c.Visit("https://www.yr.no/nb/v%C3%A6rvarsel/daglig-tabell/2-3094802/Polen/Ma%C5%82opolskie/Krak%C3%B3w/Krak%C3%B3w")
+	c.Visit(YRcities[city])
 	c.Wait() // Wait until scraping is complete
 
 	//process precipitation string->float
@@ -77,5 +70,5 @@ func WeatherFetcher() (float64, int, float64, string) {
 		fmt.Println("Wind conversion error:", err)
 		wind = 0
 	}
-	return precip, tempMin, wind, "Kraków"
+	return precip, tempMin, wind, city
 }
